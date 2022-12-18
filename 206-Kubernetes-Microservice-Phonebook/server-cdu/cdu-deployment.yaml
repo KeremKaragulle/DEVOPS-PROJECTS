@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-cdu
+  labels:
+    app: server-cdu
+spec:
+  selector:
+    matchLabels:
+      app: server-cdu
+  replicas: 3
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: server-cdu
+    spec:
+      containers:
+      - name: server-cdu
+        image: keremkaragulle/server-cdu:1.0
+        env:   
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secrets
+              key: MYSQL_PASSWORD
+        envFrom:
+        - configMapRef:
+            name: servers-configmap
+        ports:
+        - containerPort: 80
+          name: server-cdu
+      restartPolicy: Always
